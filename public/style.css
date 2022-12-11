@@ -1,0 +1,109 @@
+/* Reset */
+
+* {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: inherit;
+    font-family: inherit;
+
+    box-sizing: inherit;
+}
+
+html {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* */
+
+:root {
+    --black-light: #2D3749;
+    --black-normal: #151F2F;
+    --black-dark: #10151F;
+
+    --white-light: #F5F6FC;
+    --white-normal: #E5E8F7;
+    --white-dark: #D7DBF1;
+
+    --gray-light: #AFB9CE;
+    --gray-normal: #68758E;
+    --gray-dark: #4C5A75;
+
+    --primary-normal: #8E38EA;
+    --primary-dark: #5A00AA;
+}
+
+/* */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap');
+
+html {
+    background-color: palegreen;
+    padding: 8px;
+
+    font-family: 'Noto Sans', sans-serif;
+}
+
+body {
+    min-height: 100%;
+    background-color: white;
+    padding: 32px;
+}
+
+main {
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+/* */
+
+.twitter-card {
+    display: flex;
+    flex-direction: column;
+
+    border-radius: 16px;
+    overflow: hidden;
+
+    background-color: var(--white-light);
+    border: 1px solid var(--white-dark);
+}
+
+.twitter-card > img {
+    width: 100%;
+}
+
+.twitter-card > div {
+    padding: 14px;
+    
+    border-top: 1px solid var(--white-dark);
+    padding-top: 9px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.twitter-card .title {
+    font-size: 0.875rem;
+    font-weight: 600;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.twitter-card .description {
+    font-size: 0.875rem;
+    color: var(--gray-dark);
+}
+
+.twitter-card:focus, .twitter-card:hover {
+    cursor: default;
+    border-color: var(--black-dark);
+}
