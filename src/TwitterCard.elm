@@ -1,4 +1,4 @@
-module TwitterCard exposing (TwitterCard, dataSource, parseDocument, view)
+module TwitterCard exposing (TwitterCard, dataSource, view, withLabel)
 
 import DataSource exposing (DataSource)
 import DataSource.Http
@@ -14,9 +14,21 @@ import Url
 
 type alias TwitterCard =
     { url : String
+    , labels : List String
     , title : String
     , description : String
     , imageUrl : String
+    }
+
+
+withLabel : String -> TwitterCard -> TwitterCard
+withLabel label twitterCard =
+    let
+        { labels } =
+            twitterCard
+    in
+    { twitterCard
+        | labels = label :: labels
     }
 
 
@@ -60,18 +72,18 @@ findMetaTags node =
 {-| Meta tags have this shape:
 
     [ [ ( "charset", "UTF-8" ) ]
-    , [ ( "name", "title" ), ( "content", "..." ) ]
-    , [ ( "name", "description" ), ( "content", "..." ) ]
+    , [ ( "name", "title" ), ( "content", "My Site" ) ]
+    , [ ( "name", "description" ), ( "content", "This site is about..." ) ]
     , ...
     ]
 
 Some of these meta tags have a `name` (or a `property`) attribute with a `content`.
 
-This function filters these meta tags and saves them in a dict. For example:
+This function filters the named meta tags and saves them in a dict. For example:
 
     Dict.fromList
-        [ ( "title", "..." )
-        , ( "description", "..." )
+        [ ( "title", "My Site" )
+        , ( "description", "This site is about..." )
         ]
 
 -}
@@ -124,22 +136,17 @@ getNameAndContentHelp tag ( maybeName, maybeContent ) =
             ( maybeName, maybeContent )
 
 
-getContent : List ( String, String ) -> Maybe String
-getContent metaTag =
-    case metaTag of
-        ( "content", content ) :: _ ->
-            Just content
-
-        _ :: otherAttrs ->
-            getContent otherAttrs
-
-        [] ->
-            Nothing
-
-
 parseMetaTags : String -> Dict String String -> Maybe TwitterCard
 parseMetaTags url metaTags =
-    Maybe.map3 (TwitterCard url)
+    Maybe.map3
+        (\title description imageUrl ->
+            { url = url
+            , labels = []
+            , title = title
+            , description = description
+            , imageUrl = imageUrl
+            }
+        )
         (Dict.get "twitter:title" metaTags
             |> Maybe.Extra.orElse (Dict.get "og:title" metaTags)
             |> Maybe.Extra.orElse (Dict.get "title" metaTags)
@@ -181,7 +188,7 @@ dataSource url =
 
 
 view : TwitterCard -> Html.Html msg
-view { url, title, description, imageUrl } =
+view { url, labels, title, description, imageUrl } =
     let
         parsedUrl =
             Url.fromString url
@@ -205,17 +212,36 @@ view { url, title, description, imageUrl } =
             Html.div
                 [ Html.Attributes.class "description" ]
                 [ Html.text description ]
+
+        viewLabels =
+            Html.div
+                [ Html.Attributes.class "labels"
+                ]
+                (Html.text " "
+                    :: List.map
+                        (\label -> Html.div [] [ Html.text label ])
+                        labels
+                )
+
+        viewCard =
+            Html.a
+                [ Html.Attributes.href url
+                , Html.Attributes.target "_blank"
+                , Html.Attributes.class "twitter-card"
+                ]
+                [ Html.img [ Html.Attributes.src imageUrl ]
+                    []
+                , Html.div []
+                    [ viewUrl
+                    , viewTitle
+                    , viewDescription
+                    ]
+                ]
     in
-    Html.a
-        [ Html.Attributes.href url
-        , Html.Attributes.target "_blank"
-        , Html.Attributes.class "twitter-card"
+    Html.div
+        [ Html.Attributes.style "display" "flex"
+        , Html.Attributes.style "gap" "16px"
         ]
-        [ Html.img [ Html.Attributes.src imageUrl ]
-            []
-        , Html.div []
-            [ viewUrl
-            , viewTitle
-            , viewDescription
-            ]
+        [ viewLabels
+        , viewCard
         ]

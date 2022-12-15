@@ -42,6 +42,7 @@ data =
         [ TwitterCard.dataSource "https://medium.com/swlh/what-makes-godot-engine-great-for-advance-gui-applications-b1cfb941df3b"
         , TwitterCard.dataSource "https://felipepepe.medium.com/roblox-is-a-mud-the-history-of-virtual-worlds-muds-mmorpgs-12e41c4cb9b"
         , TwitterCard.dataSource "https://css-tricks.com/equal-columns-with-flexbox-its-more-complicated-than-you-might-think/"
+            |> DataSource.map (TwitterCard.withLabel "css")
         ]
 
 

@@ -57,7 +57,7 @@ body {
 }
 
 main {
-    max-width: 460px;
+    max-width: 580px;
     margin: 0 auto;
 }
 
@@ -106,4 +106,22 @@ main {
 .twitter-card:focus, .twitter-card:hover {
     cursor: default;
     border-color: var(--black-dark);
+}
+
+.labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    min-width: 120px;
+}
+
+.labels > * {
+    display: inline-block;
+    background-color: palegreen;
+    padding: 4px 8px;
+    border-radius: 8px;
+
+    color: var(--black-normal);
+    font-size: 14px;
 }
