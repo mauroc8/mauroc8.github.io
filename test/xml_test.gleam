@@ -35,19 +35,11 @@ pub fn document_test() {
   let document =
     html.document(
       lang: "en",
-      title: "Test document",
-      head: #([], [html.meta([html.name("robots"), html.content("index")])]),
+      head: #([], [html.title("Test document")]),
       body: #([], [html.text("Hello world")]),
     )
-    |> html.with_external_stylesheet("styles.css")
 
-  let stylesheets_string = "<link rel=\"stylesheet\" href=\"styles.css\" />"
-  let meta_robots_string = "<meta name=\"robots\" content=\"index\" />"
-
-  let head_string =
-    "<meta charset=\"UTF-8\" /><title>Test document</title>"
-    |> string.append(stylesheets_string)
-    |> string.append(meta_robots_string)
+  let head_string = "<meta charset=\"UTF-8\" /><title>Test document</title>"
 
   document
   |> html.to_string

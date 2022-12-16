@@ -126,6 +126,10 @@ pub fn li(attributes: List(Attribute), children: List(Node)) {
   tag("li", attributes, children)
 }
 
+pub fn title(content: String) {
+  tag("title", [], [text(content)])
+}
+
 fn self_closing_tag(tag_name: String, attributes: List(Attribute)) {
   Node(xml.SelfClosingTag(
     tag_name,
@@ -180,21 +184,17 @@ pub fn content(value: String) {
 pub opaque type Document {
   Document(
     lang: String,
-    title: String,
     head_attributes: List(Attribute),
     head_children: List(Node),
-    external_stylesheets: List(String),
     inline_css: List(String),
     body_attributes: List(Attribute),
     body_children: List(Node),
-    external_scripts: List(String),
     inline_scripts: List(String),
   )
 }
 
 pub fn document(
   lang lang: String,
-  title title: String,
   head head: #(List(Attribute), List(Node)),
   body body: #(List(Attribute), List(Node)),
 ) {
@@ -203,22 +203,12 @@ pub fn document(
 
   Document(
     lang: lang,
-    title: title,
     head_attributes: head_attributes,
     head_children: head_children,
-    external_stylesheets: [],
     inline_css: [],
     body_attributes: body_attributes,
     body_children: body_children,
-    external_scripts: [],
     inline_scripts: [],
-  )
-}
-
-pub fn with_external_stylesheet(document: Document, stylesheet_path: String) {
-  Document(
-    ..document,
-    external_stylesheets: [stylesheet_path, ..document.external_stylesheets],
   )
 }
 
@@ -226,23 +216,16 @@ pub fn with_inline_css(document: Document, inline_css: String) {
   Document(..document, inline_css: [inline_css, ..document.inline_css])
 }
 
+pub fn with_inline_javascript(document: Document, inline_script: String) {
+  Document(
+    ..document,
+    inline_scripts: [inline_script, ..document.inline_scripts],
+  )
+}
+
 pub fn to_string(document: Document) {
   let meta_charset =
     xml.SelfClosingTag("meta", [xml.StringAttribute("charset", "UTF-8")])
-
-  let title = xml.Tag("title", [], [xml.Text(document.title)])
-
-  let external_stylesheets =
-    document.external_stylesheets
-    |> list.map(fn(path) {
-      xml.SelfClosingTag(
-        "link",
-        [
-          xml.StringAttribute("rel", "stylesheet"),
-          xml.StringAttribute("href", path),
-        ],
-      )
-    })
 
   let head_children =
     document.head_children
@@ -253,27 +236,8 @@ pub fn to_string(document: Document) {
       "head",
       document.head_attributes
       |> list.map(attribute_to_xml),
-      [
-        meta_charset,
-        title,
-        ..external_stylesheets
-        |> list.append(head_children)
-      ],
+      [meta_charset, ..head_children],
     )
-
-  let script_tags =
-    document.external_scripts
-    |> list.map(fn(script_path) {
-      xml.Tag(
-        "script",
-        [
-          xml.StringAttribute("src", script_path),
-          xml.BooleanAttribute("defer", True),
-          xml.StringAttribute("type", "module"),
-        ],
-        [],
-      )
-    })
 
   let inline_scripts =
     document.inline_scripts
@@ -288,7 +252,6 @@ pub fn to_string(document: Document) {
       |> list.map(attribute_to_xml),
       document.body_children
       |> list.map(to_xml)
-      |> list.append(script_tags)
       |> list.append(inline_scripts),
     )
 
