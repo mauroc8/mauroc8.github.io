@@ -1,7 +1,7 @@
 import gleeunit/should
-import xml
 import gleam/string
-import html
+import lib/xml
+import lib/html
 
 pub fn button_test() {
   let button =
@@ -36,10 +36,10 @@ pub fn document_test() {
     html.document(
       lang: "en",
       title: "Test document",
-      head: [html.meta([html.name("robots"), html.content("index")])],
+      head: #([], [html.meta([html.name("robots"), html.content("index")])]),
       body: #([], [html.text("Hello world")]),
     )
-    |> html.with_stylesheet("styles.css")
+    |> html.with_external_stylesheet("styles.css")
 
   let stylesheets_string = "<link rel=\"stylesheet\" href=\"styles.css\" />"
   let meta_robots_string = "<meta name=\"robots\" content=\"index\" />"

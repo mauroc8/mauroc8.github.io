@@ -1,6 +1,6 @@
 import gleam/string_builder
-import xml
 import gleam/list
+import lib/xml
 
 /// An HTML 5 node
 pub opaque type Node {
@@ -164,12 +164,16 @@ fn attribute_to_xml(attribute: Attribute) {
   xml_attribute
 }
 
+pub fn string_attribute(name: String, value: String) {
+  Attribute(xml.StringAttribute(name, value))
+}
+
 pub fn name(value: String) {
-  Attribute(xml.StringAttribute("name", value))
+  string_attribute("name", value)
 }
 
 pub fn content(value: String) {
-  Attribute(xml.StringAttribute("content", value))
+  string_attribute("content", value)
 }
 
 /// An HTML 5 document
@@ -177,62 +181,105 @@ pub opaque type Document {
   Document(
     lang: String,
     title: String,
-    head: List(Node),
-    stylesheet_paths: List(String),
+    head_attributes: List(Attribute),
+    head_children: List(Node),
+    external_stylesheets: List(String),
+    inline_css: List(String),
     body_attributes: List(Attribute),
     body_children: List(Node),
+    external_scripts: List(String),
+    inline_scripts: List(String),
   )
 }
 
 pub fn document(
   lang lang: String,
   title title: String,
-  head head: List(Node),
+  head head: #(List(Attribute), List(Node)),
   body body: #(List(Attribute), List(Node)),
 ) {
+  let #(head_attributes, head_children) = head
   let #(body_attributes, body_children) = body
 
   Document(
     lang: lang,
     title: title,
-    head: head,
-    stylesheet_paths: [],
+    head_attributes: head_attributes,
+    head_children: head_children,
+    external_stylesheets: [],
+    inline_css: [],
     body_attributes: body_attributes,
     body_children: body_children,
+    external_scripts: [],
+    inline_scripts: [],
   )
 }
 
-pub fn with_stylesheet(document: Document, stylesheet_path: String) {
+pub fn with_external_stylesheet(document: Document, stylesheet_path: String) {
   Document(
     ..document,
-    stylesheet_paths: [stylesheet_path, ..document.stylesheet_paths],
+    external_stylesheets: [stylesheet_path, ..document.external_stylesheets],
   )
+}
+
+pub fn with_inline_css(document: Document, inline_css: String) {
+  Document(..document, inline_css: [inline_css, ..document.inline_css])
 }
 
 pub fn to_string(document: Document) {
+  let meta_charset =
+    xml.SelfClosingTag("meta", [xml.StringAttribute("charset", "UTF-8")])
+
+  let title = xml.Tag("title", [], [xml.Text(document.title)])
+
+  let external_stylesheets =
+    document.external_stylesheets
+    |> list.map(fn(path) {
+      xml.SelfClosingTag(
+        "link",
+        [
+          xml.StringAttribute("rel", "stylesheet"),
+          xml.StringAttribute("href", path),
+        ],
+      )
+    })
+
+  let head_children =
+    document.head_children
+    |> list.map(to_xml)
+
   let head =
     xml.Tag(
       "head",
-      [],
+      document.head_attributes
+      |> list.map(attribute_to_xml),
       [
-        xml.SelfClosingTag("meta", [xml.StringAttribute("charset", "UTF-8")]),
-        xml.Tag("title", [], [xml.Text(document.title)]),
-        ..document.stylesheet_paths
-        |> list.map(fn(path) {
-          xml.SelfClosingTag(
-            "link",
-            [
-              xml.StringAttribute("rel", "stylesheet"),
-              xml.StringAttribute("href", path),
-            ],
-          )
-        })
-        |> list.append(
-          document.head
-          |> list.map(to_xml),
-        )
+        meta_charset,
+        title,
+        ..external_stylesheets
+        |> list.append(head_children)
       ],
     )
+
+  let script_tags =
+    document.external_scripts
+    |> list.map(fn(script_path) {
+      xml.Tag(
+        "script",
+        [
+          xml.StringAttribute("src", script_path),
+          xml.BooleanAttribute("defer", True),
+          xml.StringAttribute("type", "module"),
+        ],
+        [],
+      )
+    })
+
+  let inline_scripts =
+    document.inline_scripts
+    |> list.map(fn(script_content) {
+      xml.UnescapedContentTag("script", [], script_content)
+    })
 
   let body =
     xml.Tag(
@@ -240,7 +287,9 @@ pub fn to_string(document: Document) {
       document.body_attributes
       |> list.map(attribute_to_xml),
       document.body_children
-      |> list.map(to_xml),
+      |> list.map(to_xml)
+      |> list.append(script_tags)
+      |> list.append(inline_scripts),
     )
 
   string_builder.from_string("<!doctype HTML>\n")
