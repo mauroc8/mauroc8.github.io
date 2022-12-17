@@ -180,6 +180,18 @@ pub fn content(value: String) {
   string_attribute("content", value)
 }
 
+pub fn rel(value: String) {
+  string_attribute("rel", value)
+}
+
+pub fn href(value: String) {
+  string_attribute("href", value)
+}
+
+pub fn src(value: String) {
+  string_attribute("src", value)
+}
+
 /// An HTML 5 document
 pub opaque type Document {
   Document(

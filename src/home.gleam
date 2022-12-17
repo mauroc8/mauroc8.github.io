@@ -5,7 +5,10 @@ pub fn document() {
 }
 
 fn head() {
-  [html.title("Saved articles and links")]
+  [
+    html.title("Saved articles and links"),
+    html.link([html.rel("stylesheet"), html.href("styles.css")]),
+  ]
 }
 
 fn body() {
