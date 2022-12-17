@@ -12,5 +12,5 @@ fn head() {
 }
 
 fn body() {
-  [html.div([], [html.text("Hello world")])]
+  [html.div([], [html.text("Hello world")]), html.div([], [html.text(" ")])]
 }

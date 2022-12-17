@@ -1,5 +1,6 @@
 import gleam/string_builder
 import gleam/list
+import gleam/string
 import lib/xml
 
 /// An HTML 5 node
@@ -190,6 +191,21 @@ pub fn href(value: String) {
 
 pub fn src(value: String) {
   string_attribute("src", value)
+}
+
+pub fn style(styles: List(#(String, String))) {
+  string_attribute(
+    "style",
+    styles
+    |> list.map(fn(style) {
+      let #(prop, value) = style
+
+      string.append(prop, ": ")
+      |> string.append(value)
+      |> string.append(";")
+    })
+    |> string.join(" "),
+  )
 }
 
 /// An HTML 5 document
