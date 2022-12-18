@@ -34,7 +34,7 @@ pub fn input_test() {
 pub fn document_test() {
   let document =
     html.document(
-      lang: "en",
+      [html.lang("en")],
       head: #([], [html.title("Test document")]),
       body: #([], [html.text("Hello world")]),
     )

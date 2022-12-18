@@ -208,21 +208,23 @@ pub fn style(styles: List(#(String, String))) {
   )
 }
 
+pub fn lang(value: String) {
+  string_attribute("lang", value)
+}
+
 /// An HTML 5 document
 pub opaque type Document {
   Document(
-    lang: String,
+    html_attributes: List(Attribute),
     head_attributes: List(Attribute),
     head_children: List(Node),
-    inline_css: List(String),
     body_attributes: List(Attribute),
     body_children: List(Node),
-    inline_scripts: List(String),
   )
 }
 
 pub fn document(
-  lang lang: String,
+  html_attributes html_attributes: List(Attribute),
   head head: #(List(Attribute), List(Node)),
   body body: #(List(Attribute), List(Node)),
 ) {
@@ -230,24 +232,11 @@ pub fn document(
   let #(body_attributes, body_children) = body
 
   Document(
-    lang: lang,
+    html_attributes: html_attributes,
     head_attributes: head_attributes,
     head_children: head_children,
-    inline_css: [],
     body_attributes: body_attributes,
     body_children: body_children,
-    inline_scripts: [],
-  )
-}
-
-pub fn with_inline_css(document: Document, inline_css: String) {
-  Document(..document, inline_css: [inline_css, ..document.inline_css])
-}
-
-pub fn with_inline_javascript(document: Document, inline_script: String) {
-  Document(
-    ..document,
-    inline_scripts: [inline_script, ..document.inline_scripts],
   )
 }
 
@@ -267,26 +256,20 @@ pub fn to_string(document: Document) {
       [meta_charset, ..head_children],
     )
 
-  let inline_scripts =
-    document.inline_scripts
-    |> list.map(fn(script_content) {
-      xml.UnescapedContentTag("script", [], script_content)
-    })
-
   let body =
     xml.Tag(
       "body",
       document.body_attributes
       |> list.map(attribute_to_xml),
       document.body_children
-      |> list.map(to_xml)
-      |> list.append(inline_scripts),
+      |> list.map(to_xml),
     )
 
   string_builder.from_string("<!doctype HTML>\n")
   |> string_builder.append(xml.to_string(xml.Tag(
     "html",
-    [xml.StringAttribute("lang", document.lang)],
+    document.html_attributes
+    |> list.map(attribute_to_xml),
     [xml.Text("\n"), head, xml.Text("\n"), body, xml.Text("\n")],
   )))
   |> string_builder.append("\n")

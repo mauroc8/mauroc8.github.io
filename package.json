@@ -1,0 +1,14 @@
+{
+  "name": "mauroc8.github.io",
+  "version": "1.0.0",
+  "main": "dist/index.html",
+  "repository": "https://github.com/mauroc8/mauroc8.github.io.git",
+  "author": "Mauro Cano <maurocanobrusa@gmail.com>",
+  "license": "privative",
+  "private": false,
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "finalhandler": "^1.2.0",
+    "serve-static": "^1.15.0"
+  }
+}

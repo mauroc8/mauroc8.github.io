@@ -1,0 +1,11 @@
+
+header {
+    background-color: var(--black-normal);
+    color: var(--white-normal);
+    padding: 32px;
+    font-size: 5rem;
+}
+
+header > * {
+    font-family: 'Source Code Pro', monospace;
+}
